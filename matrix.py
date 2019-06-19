@@ -240,6 +240,25 @@ def simple_fps(f, N):
             X[j,k] = h**4 * G[j,k] / (sigma[j]+sigma[k])
     return S * X * S
 
+def fps(f, N):
+    h = 1 / (N+1)
+    x = [i*h for i in range(1,N+1)]
+    y = deepcopy(x)
+    F = zeros(N,N)
+    sigma = [0]*N
+    for (i,a) in enumerate(x):
+        sigma[i] = sin(a*pi/2)**2
+        for (j,b) in enumerate(y):
+            F[i,j] = f(a,b)
+    G1 = fst(F)
+    G = fst(G1.transpose()).transpose()
+    X = zeros(N,N)
+    for j in range(N):
+        for k in range(N):
+            X[j,k] = h**4 * G[j,k] / (sigma[j]+sigma[k])
+    V1 = fst(X)
+    return fst(V1.transpose()).transpose()
+
 # For FPS
 def frhs(x,y):
     return 1
@@ -258,6 +277,18 @@ Z1 = np.matrix(simple_fps(frhs, 16).data)
 
 surf = ax.plot_surface(X1,Y1,Z1)
 plt.show()
+
+# FFT Based
+fig = plt.figure(figsize=(10,6), dpi=300)
+ax = fig.gca(projection='3d')
+x2 = [i/16 for i in range(1,16)]
+y2 = deepcopy(x2)
+X2, Y2 = np.meshgrid(x2, y2)
+Z2 = np.matrix(simple_fps(frhs, 15).data)
+
+surf = ax.plot_surface(X2,Y2,Z2)
+plt.show()
+
 
 # DFT & FFT Test
 x_sample = np.random.rand(16)
