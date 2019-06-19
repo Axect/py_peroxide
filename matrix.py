@@ -1,6 +1,10 @@
-from functools import reduce
-from copy import deepcopy
-from pandas import DataFrame
+from functools import reduce   # Functional Programming
+from copy import deepcopy      # For Deep copy
+from pandas import DataFrame   # To print matrix
+from numpy.linalg import eig
+from cmath import pi, exp, sin # For complex
+import numpy as np             # Just for comparison
+import scipy.fftpack as sfft
 
 class matrix:
     def __init__(self, array_of_array):
@@ -14,6 +18,16 @@ class matrix:
         self.dual[key[1]][key[0]] = val
 
     def __getitem__(self, key):
+        if isinstance(key, int):
+            if self.nrow == 1:
+                return self.data[0][key]
+            elif self.ncol == 1:
+                return self.dual[0][key]
+        if isinstance(key, slice):
+            if self.nrow == 1:
+                return self.data[0][key]
+            elif self.ncol == 1:
+                return self.dual[0][key]
         return self.data[key[0]][key[1]]
 
     def __repr__(self):
@@ -36,6 +50,13 @@ class matrix:
         self.index += 1
         return v
 
+    def __add__(self, other):
+        mat = zeros(self.nrow, self.ncol)
+        for i in range(self.nrow):
+            for j in range(self.ncol):
+                mat[i,j] = self[i,j] + other[i,j]
+        return mat
+
     def __mul__(self, other):
         mat = [[0 for i in range(other.ncol)] for i in range(self.nrow)]
         for (i, row) in enumerate(self.data):
@@ -50,17 +71,42 @@ class matrix:
                 mat[i][j] = other * self[i,j]
         return matrix(mat)
 
+    def __len__(self):
+        return self.nrow * self.ncol
+
     def transpose(self):
         return matrix(self.dual)
 
     def t(self):
         return self.transpose()
 
+def from_index(f, tup):
+    m = zeros(tup[0], tup[1])
+    for i in range(tup[0]):
+        for j in range(tup[1]):
+            m[i,j] = f(i,j)
+    return m
+
+def from_col(V):
+    m = zeros(len(V),1)
+    for i in range(len(V)):
+        m[i,0] = V[i]
+    return m
+
+def from_row(V):
+    m = zeros(1, len(V))
+    for i in range(len(V)):
+        m[0,i] = V[i]
+    return m
+
 def eye(n):
     mat = matrix([[0 for i in range(n)] for i in range(n)])
     for i in range(n):
         mat[i,i] = 1
     return mat
+
+def zeros(m, n):
+    return matrix([[0 for i in range(n)] for i in range(m)])
 
 def hcat(x, y):
     a = deepcopy(x.dual)
@@ -83,16 +129,108 @@ def dual_create(array_of_array):
             copy_mat[j][i] = array_of_array[i][j]
     return copy_mat
 
-m = matrix([[2,-1,0,0],[-1,2,-1,0],[0,-1,2,-1],[0,0,-1,2]])
-n = eye(4)
-
+# number x, matrix Y
 def kron_each(x, Y):
     return x * Y
 
+# array V, matrix Y
 def kron_map(V, Y):
     return reduce(lambda x,y: hcat(x,y), map(lambda x: kron_each(x,Y), V))
 
+# matrix X, matrix Y
 def kron(X,Y):
     return reduce(lambda x,y: vcat(x,y), map(lambda x: kron_map(x, Y), X))
 
-print(kron(m,n))
+def K(n):
+    mat = zeros(n,n)
+    for i in range(n):
+        mat[i,i] = 2
+        if i < n-1:
+            mat[i,i+1] = -1
+            mat[i+1,i] = -1
+    return mat
+
+def K2D(n):
+    k = K(n)
+    i = eye(n)
+    return kron(k,i) + kron(i,k)
+
+def dft(V):
+    N = V.nrow
+    W = from_index(lambda k, n: exp(-2*pi*1j*k*n / N), (N, N))
+    return W*V
+
+def inv_dft(V):
+    N = V.nrow
+    W = from_index(lambda k, n: exp(2*pi*1j*k*n / N)/N, (N,N))
+    return W*V
+
+# Cooley and Tukey
+def fft(V):
+    N = V.nrow
+    if N % 2 > 0:
+        raise ValueError("size of V must be a power of 2")
+    elif N <= 32: # Optimal number
+        return dft(V)
+    else:
+        V_even = fft(from_col(V[::2]))
+        V_odd = fft(from_col(V[1::2]))
+        factor = [exp(-2j*pi*k/N) for k in range(N)]
+        upper_factor = factor[:N//2]
+        lower_factor = factor[N//2:]
+        for i in range(len(upper_factor)):
+            upper_factor[i] *= V_odd[i]
+            lower_factor[i] *= V_odd[i]
+        return vcat(V_even + from_col(upper_factor), V_even + from_col(lower_factor))
+
+def y(N, tup):
+    m = zeros(N, N)
+    k = tup[0]
+    l = tup[1]
+    for i in range(N):
+        for j in range(N):
+            m[i,j] = sin(i*k*pi/(N+1)) * sin(j*l*pi/(N+1))
+    return m
+
+# Discrete Sine Transform based on DFT
+def dst(V):
+    m = V.nrow
+    Z = zeros(2*m + 2, 1)
+    for i in range(m):
+        Z[i+1, 0] = V[i,0]
+        Z[2*m+1-i,0] = -V[i,0]
+    F = dft(Z)
+    S = zeros(m, 1)
+    for i in range(m):
+        S[i,0] = 0.5j * F[i+1,0]
+    return S
+
+# Fast Sine Transform based on FFT
+def fst(V):
+    m = V.nrow
+    Z = zeros(2*m + 2, 1)
+    for i in range(m):
+        Z[i+1, 0] = V[i,0]
+        Z[2*m+1-i,0] = -V[i,0]
+    F = fft(Z)
+    S = zeros(m, 1)
+    for i in range(m):
+        S[i,0] = 0.5j * F[i+1,0]
+    return S
+
+# DFT & FFT Test
+x_sample = np.random.rand(16)
+x = from_col(x_sample)
+X2 = fft(x)
+print(np.allclose(X2.col(0), np.fft.fft(x_sample)))
+
+# DST Test
+print(np.allclose(dst(x).col(0), 0.5*sfft.dst(x_sample, type=1)))
+
+# FFT Test
+x2 = np.random.random(1024)
+print(np.allclose(fft(from_col(x2)).col(0), np.fft.fft(x2)))
+
+# FST Test
+x3_sample = np.random.rand(511)
+print(np.allclose(fst(from_col(x3_sample)).col(0), 0.5*sfft.dst(x3_sample, type=1)))
