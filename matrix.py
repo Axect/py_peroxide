@@ -3,8 +3,10 @@ from copy import deepcopy      # For Deep copy
 from pandas import DataFrame   # To print matrix
 from numpy.linalg import eig
 from cmath import pi, exp, sin # For complex
-import numpy as np             # Just for comparison
-import scipy.fftpack as sfft
+import numpy as np             # Just for comparison (FFT) & Plotting
+import scipy.fftpack as sfft   # Just for comparison (DFT)
+import pylab as plt            # For Plotting
+from mpl_toolkits.mplot3d import Axes3D # 3DPlot
 
 class matrix:
     def __init__(self, array_of_array):
@@ -217,6 +219,45 @@ def fst(V):
     for i in range(m):
         S[i,0] = 0.5j * F[i+1,0]
     return S
+
+# Simple Fast Possiong Solver (Not based on FFT)
+def simple_fps(f, N):
+    h = 1 / (N+1)
+    x = [i*h for i in range(1,N+1)]
+    y = deepcopy(x)
+    F = zeros(N,N)
+    S = zeros(N,N)
+    sigma = [0]*N
+    for (i,a) in enumerate(x):
+        sigma[i] = sin(a*pi/2)**2
+        for (j,b) in enumerate(y):
+            F[i,j] = f(a,b)
+            S[i,j] = sin(i*j*pi*h)
+    G = S * F * S
+    X = zeros(N,N)
+    for j in range(N):
+        for k in range(N):
+            X[j,k] = h**4 * G[j,k] / (sigma[j]+sigma[k])
+    return S * X * S
+
+# For FPS
+def frhs(x,y):
+    return 1
+
+# Plot Section
+plt.rc("text", usetex=True)
+plt.rc("font", family="serif")
+
+fig = plt.figure(figsize=(10, 6), dpi=300)
+ax = fig.gca(projection='3d')
+
+x1 = [i/17 for i in range(1,17)]
+y1 = deepcopy(x1)
+X1, Y1 = np.meshgrid(x1, y1)
+Z1 = np.matrix(simple_fps(frhs, 16).data)
+
+surf = ax.plot_surface(X1,Y1,Z1)
+plt.show()
 
 # DFT & FFT Test
 x_sample = np.random.rand(16)
