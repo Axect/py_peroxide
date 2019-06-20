@@ -303,6 +303,17 @@ surf = ax.plot_surface(X1,Y1,Z1)
 plt.title(r"Diagonalization (N=64)", fontsize=16)
 plt.savefig("diag_n64.png")
 
+# N=128 Simple
+fig = plt.figure(figsize=(10, 6), dpi=300)
+ax = fig.gca(projection='3d')
+x1 = [i/129 for i in range(1,129)]
+y1 = deepcopy(x1)
+X1, Y1 = np.meshgrid(x1, y1)
+Z1 = np.matrix(simple_fps(frhs, 128).data)
+
+surf = ax.plot_surface(X1,Y1,Z1)
+plt.title(r"Diagonalization (N=128)", fontsize=16)
+plt.savefig("diag_n128.png")
 # FFT Based
 # N = 15 FFT
 fig = plt.figure(figsize=(10,6), dpi=300)
