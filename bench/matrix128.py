@@ -263,95 +263,61 @@ def fps(f, N):
 def frhs(x,y):
     return 1
 
-# Plot Section
-plt.rc("text", usetex=True)
-plt.rc("font", family="serif")
+## N=16 Simple
+#x1 = [i/17 for i in range(1,17)]
+#y1 = deepcopy(x1)
+#X1, Y1 = np.meshgrid(x1, y1)
+#Z1 = np.matrix(simple_fps(frhs, 16).data)
 
-# N=16 Simple
-fig = plt.figure(figsize=(10, 6), dpi=300)
-ax = fig.gca(projection='3d')
-x1 = [i/17 for i in range(1,17)]
-y1 = deepcopy(x1)
-X1, Y1 = np.meshgrid(x1, y1)
-Z1 = np.matrix(simple_fps(frhs, 16).data)
-
-surf = ax.plot_surface(X1,Y1,Z1)
-plt.title(r"Diagonalization (N=16)", fontsize=16)
-plt.savefig("diag_n16.png")
-
-# N=32 Simple
-fig = plt.figure(figsize=(10, 6), dpi=300)
-ax = fig.gca(projection='3d')
-x1 = [i/33 for i in range(1,33)]
-y1 = deepcopy(x1)
-X1, Y1 = np.meshgrid(x1, y1)
-Z1 = np.matrix(simple_fps(frhs, 32).data)
-
-surf = ax.plot_surface(X1,Y1,Z1)
-plt.title(r"Diagonalization (N=32)", fontsize=16)
-plt.savefig("diag_n32.png")
-
-# N=64 Simple
-fig = plt.figure(figsize=(10, 6), dpi=300)
-ax = fig.gca(projection='3d')
-x1 = [i/65 for i in range(1,65)]
-y1 = deepcopy(x1)
-X1, Y1 = np.meshgrid(x1, y1)
-Z1 = np.matrix(simple_fps(frhs, 64).data)
-
-surf = ax.plot_surface(X1,Y1,Z1)
-plt.title(r"Diagonalization (N=64)", fontsize=16)
-plt.savefig("diag_n64.png")
-
+## N=32 Simple
+#fig = plt.figure(figsize=(10, 6), dpi=300)
+#ax = fig.gca(projection='3d')
+#x1 = [i/33 for i in range(1,33)]
+#y1 = deepcopy(x1)
+#X1, Y1 = np.meshgrid(x1, y1)
+#Z1 = np.matrix(simple_fps(frhs, 32).data)
+#
+#surf = ax.plot_surface(X1,Y1,Z1)
+#plt.title(r"Diagonalization (N=32)", fontsize=16)
+#plt.savefig("diag_n32.png")
+#
+## N=64 Simple
+#fig = plt.figure(figsize=(10, 6), dpi=300)
+#ax = fig.gca(projection='3d')
+#x1 = [i/65 for i in range(1,65)]
+#y1 = deepcopy(x1)
+#X1, Y1 = np.meshgrid(x1, y1)
+#Z1 = np.matrix(simple_fps(frhs, 64).data)
+#
+#surf = ax.plot_surface(X1,Y1,Z1)
+#plt.title(r"Diagonalization (N=64)", fontsize=16)
+#plt.savefig("diag_n64.png")
+#
 # FFT Based
 # N = 15 FFT
-fig = plt.figure(figsize=(10,6), dpi=300)
-ax = fig.gca(projection='3d')
-x2 = [i/16 for i in range(1,16)]
-y2 = deepcopy(x2)
-X2, Y2 = np.meshgrid(x2, y2)
-Z2 = np.matrix(simple_fps(frhs, 15).data)
-
-surf = ax.plot_surface(X2,Y2,Z2)
-plt.title(r"FFT (N=16)", fontsize=16)
-plt.savefig("fft_n16.png")
-
-# N = 31 FFT
-fig = plt.figure(figsize=(10,6), dpi=300)
-ax = fig.gca(projection='3d')
-x2 = [i/32 for i in range(1,32)]
-y2 = deepcopy(x2)
-X2, Y2 = np.meshgrid(x2, y2)
-Z2 = np.matrix(simple_fps(frhs, 31).data)
-
-surf = ax.plot_surface(X2,Y2,Z2)
-plt.title(r"FFT (N=32)", fontsize=16)
-plt.savefig("fft_n32.png")
-
-# N = 63 FFT
-fig = plt.figure(figsize=(10,6), dpi=300)
-ax = fig.gca(projection='3d')
-x2 = [i/64 for i in range(1,64)]
-y2 = deepcopy(x2)
-X2, Y2 = np.meshgrid(x2, y2)
-Z2 = np.matrix(simple_fps(frhs, 63).data)
-
-surf = ax.plot_surface(X2,Y2,Z2)
-plt.title(r"FFT (N=64)", fontsize=16)
-plt.savefig("fft_n64.png")
-
+#x2 = [i/16 for i in range(1,16)]
+#y2 = deepcopy(x2)
+#X2, Y2 = np.meshgrid(x2, y2)
+#Z2 = np.matrix(simple_fps(frhs, 15).data)
+#
+## N = 31 FFT
+#x2 = [i/32 for i in range(1,32)]
+#y2 = deepcopy(x2)
+#X2, Y2 = np.meshgrid(x2, y2)
+#Z2 = np.matrix(simple_fps(frhs, 31).data)
+#
+## N = 63 FFT
+#x2 = [i/64 for i in range(1,64)]
+#y2 = deepcopy(x2)
+#X2, Y2 = np.meshgrid(x2, y2)
+#Z2 = np.matrix(simple_fps(frhs, 63).data)
+#
 # N = 127 FFT
-fig = plt.figure(figsize=(10,6), dpi=300)
-ax = fig.gca(projection='3d')
 x2 = [i/128 for i in range(1,128)]
 y2 = deepcopy(x2)
 X2, Y2 = np.meshgrid(x2, y2)
 Z2 = np.matrix(simple_fps(frhs, 127).data)
-
-surf = ax.plot_surface(X2,Y2,Z2)
-plt.title(r"FFT (N=128)", fontsize=16)
-plt.savefig("fft_n128.png")
-
+#
 
 ## DFT & FFT Test
 #x_sample = np.random.rand(16)
